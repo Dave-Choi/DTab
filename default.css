@@ -1,0 +1,102 @@
+#debug{
+  color: red;
+}
+
+body{
+  width: 600px;
+  font-size: 14px;
+  overflow-x:hidden;
+}
+
+img{
+  height: 16px;
+  width: 16px;
+}
+
+a{
+  cursor: pointer;
+}
+
+.tab{
+  clear: both;
+  color: blue;
+  margin-bottom: 10px;
+  float: left;
+  border-left: solid black 5px;
+  padding-left: 10px;
+  width: 520px;
+}
+
+.tab .icons{
+  float: left;
+  margin-right: 10px;
+}
+
+.tab .icons img{
+  margin-bottom: 5px;
+}
+
+.tab .info{
+  width: 480px;
+  float: right;
+}
+
+h1{
+  font-size: 20px;
+}
+
+.tab h2{
+  color: black;
+  margin: 0px;
+  font-size: 16px;
+}
+
+.tab img{
+  margin-right: 5px;
+}
+
+.tab .url{
+  color: blue;
+}
+
+.tabGroup{
+  clear: both;
+  width: 500px;
+}
+
+.tabGroup .expandHandle{
+  width: 25px;
+  height: 25px;
+  font-size: 20px;
+  text-align: center;
+  float: left;
+  margin-right: 10px;
+  cursor: pointer;
+
+  -webkit-transition: all .2s ease-in-out;
+}
+
+.tabGroup .newWindowButton{
+  margin-left: 10px;
+}
+
+.tabGroup .deleteGroupButton{
+  float: right;
+}
+
+.expanded{
+  color: blue;
+  cursor: pointer;
+  -webkit-transform: rotate(90deg);
+  -webkit-transition: all .2s ease-in-out;
+}
+
+.hidden{
+  display: none;
+}
+
+.tabsList{
+  padding-left: 40px;
+  width: 550px;
+  float: left;
+}

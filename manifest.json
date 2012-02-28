@@ -1,0 +1,12 @@
+{
+  "name": "DTab",
+  "version": "1.0",
+  "description": "Tab group management.  Allows you to save groups of tabs and recall them by name, for when you need a lot of information available for reference, but don't want to bog down your system with a million open tabs.",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "popup": "popup.html"
+  },
+  "permissions": [
+    "tabs"
+  ]
+}
