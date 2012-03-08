@@ -1,9 +1,13 @@
 <html>
 <head>
   <link rel="stylesheet" href="default.css" />
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
   <script>
+
+    var dropped = false;
+    var dropTarget = false;
+
     function debug(message){
       $("#debug").html(message);
     }
@@ -47,12 +51,12 @@
 
     function tabNode(tab){
       //Show: title, url
-      //Controls for: delete from group
-      //Eventually: reorder, switch group
-      var node = document.createElement("div");
+      //Controls for: reorder, switch group
+      var node = document.createElement("li");
       node.className = "tab";
 
       $(node).append(tabIconsNode(tab.favIconUrl), tabInfoNode(tab.title, tab.url));
+      node.tabData = tab;
       return node;
     }
 
@@ -86,7 +90,7 @@
       $headerNode.append(titleNode, newWindowButton);
       $(titleNode).click(function(){ openTabGroupInOwnWindow(groupName); });
 
-      var tabsList = document.createElement("div");
+      var tabsList = document.createElement("ul");
       tabsList.className = "tabsList hidden";
 
       $(expandHandle).click(function(e){
@@ -98,7 +102,8 @@
         else{
           this.title = "Expand Group";
         }
-        $(tabsList).toggle(200);
+        //$(tabsList).toggle(200);
+        $(tabsList).toggleClass("expanded");
       });
 
       $(node).append(headerNode, tabsList);
@@ -107,6 +112,39 @@
         var tab = tabs[i];
         $(tabsList).append(tabNode(tab));
       }
+
+
+      $(tabsList).sortable({
+          opacity: .5, 
+          items: "li", 
+          placeholder: "sortablePlaceholder tab expanded", 
+          forcePlaceholderSize: true,
+          tolerance: "pointer",
+          cursor: "default",
+          connectWith: ".tabsList.expanded",
+          start: function(e, ui){
+            dropped = ui.item;
+          },
+          stop: function(e, ui){
+            if(dropped){
+              //console.log(ui.item);
+              if(dropTarget){
+                dropTarget.append(dropped);
+              }
+              dropped = false;
+            }
+          }
+      });
+
+      $(headerNode).droppable({
+        hoverClass: "highlighted",
+        tolerance: "pointer",
+        drop: function(e, ui){
+          //var tabNode = $(e.target).parents(".tab");
+          var target = $(this).siblings(".tabsList");
+          dropTarget = target;
+        }
+      });
       return node;
     }
 

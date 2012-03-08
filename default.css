@@ -17,14 +17,35 @@ a{
   cursor: pointer;
 }
 
+#target{
+  height: 500px;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.sortablePlaceholder{
+  border: dashed black 1px;
+  //width: 100%;
+}
+
+.highlighted{
+  background-color: #cfdfff;
+  border-radius: 5px;
+  -webkit-transition: all .3s ease-in-out;
+}
+
 .tab{
   clear: both;
   color: blue;
   margin-bottom: 10px;
   float: left;
   border-left: solid black 5px;
+  border: solid black 1px;
+  padding: 5px;
   padding-left: 10px;
-  width: 520px;
+  width: 500px;
+  background-color: white;
 }
 
 .tab .icons{
@@ -37,12 +58,13 @@ a{
 }
 
 .tab .info{
-  width: 480px;
+  width: 440px;
   float: right;
 }
 
 h1{
   font-size: 20px;
+  -webkit-transition: all .3s ease-in-out;
 }
 
 .tab h2{
@@ -76,19 +98,19 @@ h1{
   -webkit-transition: all .2s ease-in-out;
 }
 
+.tabGroup .expandHandle.expanded{
+  color: blue;
+  cursor: pointer;
+  -webkit-transform: rotate(90deg);
+  -webkit-transition: all .2s ease-in-out;
+}
+
 .tabGroup .newWindowButton{
   margin-left: 10px;
 }
 
 .tabGroup .deleteGroupButton{
   float: right;
-}
-
-.expanded{
-  color: blue;
-  cursor: pointer;
-  -webkit-transform: rotate(90deg);
-  -webkit-transition: all .2s ease-in-out;
 }
 
 .hidden{
@@ -99,4 +121,8 @@ h1{
   padding-left: 40px;
   width: 550px;
   float: left;
+}
+
+.tabsList.expanded{
+  display: block;
 }
