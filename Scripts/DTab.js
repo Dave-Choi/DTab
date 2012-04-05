@@ -20,6 +20,7 @@ DTab.TabView = Ember.View.extend({
   }.property("tab")
 });
 
+
 DTab.TabGroup = Ember.Object.extend({
   title: null,
   tabs: [],
@@ -61,18 +62,36 @@ DTab.TabGroup = Ember.Object.extend({
   openInNewWindow: function(){
     var group = this;
     var urls = this.get("urls");
-    //urls = ["http://www.google.com"];
     chrome.windows.create({focused: true, url: urls});
   }
 });
+
+
+DTab.TabGroupTitleView = Ember.View.extend({
+  templateName: "tabGroupTitle",
+  tagName: "h1",
+
+  parentView: null,
+  tabGroup: null
+});
+
+
+DTab.TabGroupTitlePrompt = Ember.TextField.extend({
+  placeholder: "Name These Tabs",
+  classNames: ["titlePrompt"],
+
+  parentView: null,
+  tabGroup: null
+});
+
 
 DTab.TabGroupView = Ember.View.extend({
   templateName: "tabGroup",
   tagName: "div",
   classNames: ["tabGroup"],
   tabGroup: null,
+  titleView: null,
   isCollapsed: true,
-  alwaysTrue: true,
 
   isExpanded: function(){
     //This is so stupid
@@ -82,31 +101,33 @@ DTab.TabGroupView = Ember.View.extend({
   toggleCollapsed: function(){
     var isCollapsed = this.get("isCollapsed");
     this.set("isCollapsed", !isCollapsed);
-  },
-
-  openInOwnWindow: function(){
-    this.get("tabGroup").openInOwnWindow();
-  },
-
-  openInNewWindow: function(){
-    this.get("tabGroup").openInNewWindow();
   }
 });
 
-var tgview = DTab.TabGroupView.create();
-console.log(tgview.get("alwaysTrue"));
 
 DTab.TabGroupController = Ember.ArrayController.create({
   content: [],
+
+  initCurrentWindowGroup: function(){
+    var title = Ember.TextField.extend({});
+    var currentGroup = DTab.TabGroup.create({});
+    this.addObject(currentGroup);
+
+    chrome.windows.getCurrent(function(win){
+      chrome.tabs.getAllInWindow(win.id, function(tabs){
+        currentGroup.set("tabs", tabs);
+      });
+    });
+  },
+
   initFromLocalStorage: function(){
-    var key;
-    var content = this.get("content");
-    for(key in localStorage){
+    for(var key in localStorage){
       var data = JSON.parse(localStorage[key]);
       var group = DTab.TabGroup.create({title: key, tabs: data});
-      content.push(group);
+      this.addObject(group);
     }
   },
+
   log: function(){
     var content = this.get("content");
     var i, len = content.length;
@@ -117,12 +138,15 @@ DTab.TabGroupController = Ember.ArrayController.create({
 
 });
 
+
 DTab.MainView = Ember.View.create({
   templateName: "mainView"
 });
 
+
 $(document).ready(function(){
-  var tgc = DTab.TabGroupController
+  var tgc = DTab.TabGroupController;
+  tgc.initCurrentWindowGroup();
   tgc.initFromLocalStorage();
   tgc.log();
-})
+});

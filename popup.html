@@ -1,9 +1,10 @@
 <html>
 <head>
 	<link rel="stylesheet" href="default.css" />
+	<link rel="stylesheet" href="font-awesome.css" />
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-	<script src="Scripts/Lib/ember-0.9.5.min.js"></script>
+	<script src="Scripts/Lib/ember-0.9.6.min.js"></script>
   <script src="Scripts/DTab.js"></script>
 
   <script type="text/x-handlebars" data-template-name="tab">
@@ -16,11 +17,24 @@
   		</div>
   </script>
 
-  <script type="text/x-handlebars" data-template-name="tabGroup">
-		<a title="Expand Group" {{bindAttr class="isExpanded:expanded alwaysTrue:expandHandle"}} {{action "toggleCollapsed"}}>></a>
-		<h1><a title="Open Group in This Window" {{action "openInOwnWindow"}}>{{tabGroup.title}}</a><a title="Open Group in New Window" {{action "openInNewWindow"}}><img class="newWindowButton" src="external.png" /></a></h1>
+  <script type="text/x-handlebars" data-template-name="tabGroupTitle">
+		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a><a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><img class="newWindowButton" src="external.png" /></a>
+  </script>
 
-		<ul {{bindAttr class="isCollapsed:hidden alwaysTrue:tabList"}}>
+  <script type="text/x-handlebars" data-template-name="tabGroupTitlePrompt">
+		
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="tabGroup">
+		<a title="Expand Group" {{bindAttr class="isExpanded:expanded :expandHandle"}} {{action "toggleCollapsed"}}>></a>
+
+		{{#if tabGroup.title}}
+			{{view DTab.TabGroupTitleView tabGroupBinding="tabGroup" parentViewBinding="this"}}
+		{{else}}
+			{{view DTab.TabGroupTitlePrompt tabGroupBinding="tabGroup" parentViewBinding="this"}}
+		{{/if}}
+
+		<ul {{bindAttr class="isCollapsed:hidden :tabList"}}>
 			{{#each tabGroup.tabs}}
 				{{view DTab.TabView tabBinding="this"}}
 			{{/each}}
@@ -28,25 +42,29 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupList">
-  	
   </script>
 
-  <script type="text/x-handlebars" data-template-name="mainView">
-  	
-  </script>
 </head>
 
 <body>
-	<div id="target">
-		<div id="saveForm">
-			<a><input id="saveAsName" placeholder="A Name For This Window's Tabs" /></a>
-			<input id="saveTabsButton" type="button" value="Save Them" />
+	<div id="DTab">
+		<div id="mainControls">
+			<ul>
+				<li><i class="icon-camera-retro"></i></li>
+			</ul>
 		</div>
-		<script type="text/x-handlebars">
-			{{#each DTab.TabGroupController contentBinding="this"}}
-				{{view DTab.TabGroupView tabGroupBinding="this"}}
-			{{/each}}
-  	</script>
+
+  	<div id="target">
+  		<script type="text/x-handlebars">
+		  	{{#each DTab.TabGroupController contentBinding="this"}}
+		  		{{#if title}}
+						{{view DTab.TabGroupView tabGroupBinding="this"}}
+					{{else}}
+						{{view DTab.TabGroupView tabGroupBinding="this" isCollapsedBinding="true"}}
+					{{/if}}
+				{{/each}}
+  		</script>
+  	</div>
 	</div>
 
 
