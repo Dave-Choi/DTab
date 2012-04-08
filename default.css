@@ -8,28 +8,11 @@
   src: url("Fonts/pulsarjs.ttf");
 }
 
-@font-face{
-  font-family: fontawesome;
-  src: url("Fonts/fontawesome-webfont.ttf");
-}
-
-.icons{
-  font-family: fontawesome;
-}
-
-#debug{
-  color: red;
-}
-
-.titlePrompt{
-  width: 450px;
-  height: 25px;
-  font-size: 18px;
-}
-
 body{
   width: 600px;
   font-size: 14px;
+  padding: 0px;
+  margin: 0px;
   overflow-x:hidden;
 }
 
@@ -42,11 +25,57 @@ a{
   cursor: pointer;
 }
 
+h1{
+  font-size: 20px;
+  -webkit-transition: all .3s ease-in-out;
+}
+
+#mainControls{
+  margin: 0px;
+  background-color: black;
+  color: white;
+  position: fixed;
+  width: 100%;
+  top: 0px;
+
+  padding: 15px 0px 15px 0px;
+
+  font-size: 18px;
+  border-radius: 5px 5px 0px 0px;
+
+  box-shadow: 
+    0 2px 6px rgba(0,0,0,0.5), 
+    inset 0 1px rgba(255,255,255,0.3), 
+    inset 0 25px rgba(255,255,255,0.2), 
+    inset 0 25px 30px rgba(255,255,255,0.25), 
+    inset 0 -15px 30px rgba(0,0,0,.3);
+}
+
+#mainControls >*{
+  background-color: black;
+  padding: 5px;
+  margin: 10px;
+  //border: solid #3399FF 1px;
+  border-radius: 5px;
+  font-family: Tahoma;
+  font-style: normal;
+
+  box-shadow: 
+    0 2px 6px rgba(50,50,50,50.5), 
+    inset 0 1px rgba(255,255,255,0.3), 
+    inset 0 15px rgba(255,255,255,0.2), 
+    inset 0 15px 20px rgba(255,255,255,0.25), 
+    inset 0 -15px 30px rgba(0,0,0,0.3);
+}
+
 #target{
+  margin-top: 50px;
   height: 500px;
   width: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
+  padding-top: 15px;
+  padding-bottom: 25px;
 }
 
 .sortablePlaceholder{
@@ -60,16 +89,25 @@ a{
   -webkit-transition: all .3s ease-in-out;
 }
 
+.titlePrompt{
+  width: 450px;
+  height: 25px;
+  font-size: 18px;
+  border-radius: 5px;
+}
+
 .tab{
   clear: both;
   color: blue;
   margin-bottom: 10px;
   float: left;
-  border-left: solid black 5px;
+
   border: solid black 1px;
+  border-radius: 5px;
+
   padding: 5px;
   padding-left: 10px;
-  width: 500px;
+  width: 480px;
   background-color: white;
 }
 
@@ -85,11 +123,6 @@ a{
 .tab .info{
   width: 440px;
   float: right;
-}
-
-h1{
-  font-size: 20px;
-  -webkit-transition: all .3s ease-in-out;
 }
 
 .tab h2{
@@ -113,8 +146,8 @@ h1{
 
 .tabGroup .expandHandle{
   width: 25px;
-  height: 25px;
-  font-size: 20px;
+  //height: 25px;
+  font-size: 25px;
   text-align: center;
   float: left;
   margin-right: 10px;
@@ -124,7 +157,7 @@ h1{
 }
 
 .tabGroup .expandHandle.expanded{
-  color: blue;
+  color: #3399FF;
   cursor: pointer;
   -webkit-transform: rotate(90deg);
   -webkit-transition: all .2s ease-in-out;

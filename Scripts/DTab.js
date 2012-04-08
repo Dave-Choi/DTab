@@ -128,6 +128,11 @@ DTab.TabGroupController = Ember.ArrayController.create({
     }
   },
 
+  createNewGroup: function(){
+    var group = DTab.TabGroup.create();
+    this.addObject(group);
+  },
+
   log: function(){
     var content = this.get("content");
     var i, len = content.length;
@@ -135,7 +140,6 @@ DTab.TabGroupController = Ember.ArrayController.create({
       content[i].log();
     }
   }
-
 });
 
 

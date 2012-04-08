@@ -18,7 +18,7 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitle">
-		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a><a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><img class="newWindowButton" src="external.png" /></a>
+		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> <a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><i class="icon-external-link"></i></a>
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitlePrompt">
@@ -26,7 +26,7 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroup">
-		<a title="Expand Group" {{bindAttr class="isExpanded:expanded :expandHandle"}} {{action "toggleCollapsed"}}>></a>
+		<a title="Expand Group" {{bindAttr class="isExpanded:expanded :expandHandle :icon-chevron-right"}} {{action "toggleCollapsed"}}></a>
 
 		{{#if tabGroup.title}}
 			{{view DTab.TabGroupTitleView tabGroupBinding="tabGroup" parentViewBinding="this"}}
@@ -47,27 +47,22 @@
 </head>
 
 <body>
-	<div id="DTab">
-		<div id="mainControls">
-			<ul>
-				<li><i class="icon-camera-retro"></i></li>
-			</ul>
-		</div>
-
-  	<div id="target">
-  		<script type="text/x-handlebars">
-		  	{{#each DTab.TabGroupController contentBinding="this"}}
-		  		{{#if title}}
-						{{view DTab.TabGroupView tabGroupBinding="this"}}
-					{{else}}
-						{{view DTab.TabGroupView tabGroupBinding="this" isCollapsedBinding="true"}}
-					{{/if}}
-				{{/each}}
-  		</script>
-  	</div>
+	<div id="mainControls">
+		<a class="icon-plus"> Add Group</a>
+		<a class="icon-trash"> Trash</a>
 	</div>
 
-
+	<div id="target">
+		<script type="text/x-handlebars">
+	  	{{#each DTab.TabGroupController contentBinding="this"}}
+	  		{{#if title}}
+					{{view DTab.TabGroupView tabGroupBinding="this"}}
+				{{else}}
+					{{view DTab.TabGroupView tabGroupBinding="this" isCollapsedBinding="true"}}
+				{{/if}}
+			{{/each}}
+		</script>
+	</div>
 </body>
 
 </html>
