@@ -89,6 +89,10 @@ h1{
   -webkit-transition: all .3s ease-in-out;
 }
 
+.trashed{
+  opacity: .35;
+}
+
 .titlePrompt{
   width: 450px;
   height: 25px;

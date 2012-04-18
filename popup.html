@@ -4,8 +4,13 @@
 	<link rel="stylesheet" href="font-awesome.css" />
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-	<script src="Scripts/Lib/ember-0.9.6.min.js"></script>
+	<script src="Scripts/Lib/ember-0.9.6.js"></script>
   <script src="Scripts/DTab.js"></script>
+
+  <script type="text/x-handlebars" data-template-name="mainControls">
+  	<a class="icon-plus" {{action "createNewGroup" target="DTab.TabGroupController"}}> Add Group</a>
+		<a class="icon-trash"> Empty Trash</a>	
+	</script>
 
   <script type="text/x-handlebars" data-template-name="tab">
 		<div class="icons">
@@ -18,21 +23,26 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitle">
-		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> <a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><i class="icon-external-link"></i></a>
+		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> 
+		<a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><i class="icon-external-link"></i></a>
+		<a title="Rename Group" {{action "rename" target="parentView"}}><i class="icon-edit"></i></a>
+		<a title="Trash Group" {{action "remove" target="parentView"}}><i class="icon-remove-sign"></i></a>
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitlePrompt">
 		
   </script>
 
+	<script type="text/x-handlebars" data-template-name="trashItem">
+		
+	</script>
+
+
+
   <script type="text/x-handlebars" data-template-name="tabGroup">
 		<a title="Expand Group" {{bindAttr class="isExpanded:expanded :expandHandle :icon-chevron-right"}} {{action "toggleCollapsed"}}></a>
 
-		{{#if tabGroup.title}}
-			{{view DTab.TabGroupTitleView tabGroupBinding="tabGroup" parentViewBinding="this"}}
-		{{else}}
-			{{view DTab.TabGroupTitlePrompt tabGroupBinding="tabGroup" parentViewBinding="this"}}
-		{{/if}}
+		{{view titleView tabGroupBinding="tabGroup" displayModeBinding="titleDisplayMode" parentViewBinding="this"}}
 
 		<ul {{bindAttr class="isCollapsed:hidden :tabList"}}>
 			{{#each tabGroup.tabs}}
@@ -47,19 +57,19 @@
 </head>
 
 <body>
-	<div id="mainControls">
-		<a class="icon-plus"> Add Group</a>
-		<a class="icon-trash"> Trash</a>
-	</div>
+	<script type="text/x-handlebars">
+  	{{view DTab.MainControlsView id="mainControls"}}
+	</script>
 
 	<div id="target">
 		<script type="text/x-handlebars">
+			{{#each DTab.CurrentGroupController}}
+				{{view DTab.CurrentGroupView tabGroupBinding="this"}}
+			{{/each}}
+
+		
 	  	{{#each DTab.TabGroupController contentBinding="this"}}
-	  		{{#if title}}
-					{{view DTab.TabGroupView tabGroupBinding="this"}}
-				{{else}}
-					{{view DTab.TabGroupView tabGroupBinding="this" isCollapsedBinding="true"}}
-				{{/if}}
+				{{view DTab.TabGroupView tabGroupBinding="this"}}				
 			{{/each}}
 		</script>
 	</div>
