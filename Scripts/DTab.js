@@ -105,6 +105,11 @@ DTab.TabGroup = Ember.Object.extend({
   trash: function(){
   	this.set("isTrashed", true);
   	this.removeFromLocalStorage();
+  },
+
+  untrash: function(){
+  	this.set("isTrashed", false);
+  	this.saveToLocalStorage();
   }
 
 });
@@ -115,7 +120,7 @@ DTab.TabGroupTitleView = Ember.View.extend({
   tagName: "h1",
 
   parentView: null,
-  tabGroup: null
+tabGroup: null
 });
 
 
@@ -137,6 +142,10 @@ DTab.TabGroupTitlePrompt = Ember.TextField.extend({
       this.get("parentView").set("isEditing", false);
 
     }
+  },
+
+  didInsertElement: function(){
+  	this.$().focus();
   }
 });
 
@@ -185,11 +194,6 @@ DTab.TabGroupView = Ember.View.extend({
   rename: function(){
   	console.log("rename from TabGroupView");
   	this.set("isEditing", true);
-  },
-
-  remove: function(){
-  	var tabGroup = this.get("tabGroup");
-  	tabGroup.trash();
   },
 
   trashedChanged: function(){
@@ -290,6 +294,7 @@ DTab.CurrentGroupView = DTab.TabGroupView.extend({
 DTab.CurrentGroupController = Ember.ArrayController.create({
 	content: [],
 	initCurrentWindowGroup: function(){
+		this.clear();
 		var title = Ember.TextField.extend({});
 		var currentGroup = DTab.TabGroup.create({});
 		this.addObject(currentGroup);
@@ -308,10 +313,9 @@ DTab.CurrentGroupController = Ember.ArrayController.create({
 		}
 		else{
 			var tabGroup = this.get("content")[0];
-			//tabGroup.set("title", title);
-			//tabGroup.saveToLocalStorage();
 			tabGroup.rename(title);
 			DTab.TabGroupController.addGroup(tabGroup);
+			this.initCurrentWindowGroup();
 		}
 	}
 });

@@ -97,7 +97,7 @@ h1{
 }
 
 .trashed{
-  opacity: .35;
+  opacity: .5;
 }
 
 .titlePrompt{
@@ -199,4 +199,8 @@ h1{
 
 .tabsList.expanded{
   display: block;
+}
+
+.icon-repeat{
+  color: #3399FF;
 }
