@@ -135,6 +135,7 @@ h1{
 .tab .info{
   width: 440px;
   float: right;
+  overflow: hidden;
 }
 
 .tab h2{
@@ -149,6 +150,16 @@ h1{
 
 .tab .url{
   color: blue;
+}
+
+.tabOverview{
+  margin-left: 40px;
+}
+
+.tabOverview img{
+  float: left;
+  margin-right: 10px;
+  margin-top: 10px;
 }
 
 .tabGroup{

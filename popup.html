@@ -7,12 +7,14 @@
 	<script src="Scripts/Lib/ember-0.9.6.js"></script>
   <script src="Scripts/DTab.js"></script>
 
+
   <script type="text/x-handlebars" data-template-name="mainControls">
   	<a class="icon-plus" {{action "createNewGroup" target="DTab.TabGroupController"}}> Add Group</a>
 		<a class="icon-trash"> Empty Trash</a>	
 	</script>
 
-  <script type="text/x-handlebars" data-template-name="tab">
+
+	<script type="text/x-handlebars" data-template-name="tab">
 		<div class="icons">
 			<img {{bindAttr src="tab.favIconUrl"}} />
 		</div>
@@ -21,6 +23,12 @@
   		<a {{bindAttr href="tab.url"}} {{action "open"}}>{{shortURL}}</a>
   		</div>
   </script>
+
+
+  <script type="text/x-handlebars" data-template-name="tabMini">
+		<img {{bindAttr src="tab.favIconUrl"}} />
+  </script>
+
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitle">
 		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> 
@@ -34,26 +42,25 @@
 		{{/if}}
   </script>
 
-  <script type="text/x-handlebars" data-template-name="tabGroupTitlePrompt">
-		
-  </script>
-
-	<script type="text/x-handlebars" data-template-name="trashItem">
-		
-	</script>
-
-
 
   <script type="text/x-handlebars" data-template-name="tabGroup">
 		<a title="Expand Group" {{bindAttr class="isExpanded:expanded :expandHandle :icon-chevron-right"}} {{action "toggleCollapsed"}}></a>
 
 		{{view titleView tabGroupBinding="tabGroup" displayModeBinding="titleDisplayMode" parentViewBinding="this"}}
 
-		<ul {{bindAttr class="isCollapsed:hidden :tabList"}}>
-			{{#each tabGroup.tabs}}
-				{{view DTab.TabView tabBinding="this"}}
-			{{/each}}
-		</ul>
+		{{#if isExpanded}}
+			<ul class="tabList">
+				{{#each tabGroup.tabs}}
+					{{view DTab.TabView tabBinding="this"}}
+				{{/each}}
+			</ul>
+		{{else}}
+			<div class="tabOverview">
+				{{#each tabGroup.tabs}}
+					{{view DTab.TabViewMini tabBinding="this"}}
+				{{/each}}
+			</div>
+		{{/if}}
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupList">

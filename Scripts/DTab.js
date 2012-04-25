@@ -11,6 +11,14 @@ DTab = Ember.Application.create({
 
 });
 
+
+DTab.TabViewMini = Ember.View.extend({
+	templateName: "tabMini",
+	tab: null,
+	classNames: ["tabMini"]
+});
+
+
 DTab.TabView = Ember.View.extend({
   templateName: "tab",
   tab: null,
@@ -159,7 +167,6 @@ DTab.TabGroupView = Ember.View.extend({
   isEditing: false,
   
   titleView: function(){
-  	console.log("calling titleView");
   	var isEditing = this.get("isEditing");
   	var needsTitle = false;
 		var tabGroup = this.get("tabGroup");
