@@ -12,18 +12,8 @@ DTab = Ember.Application.create({
 });
 
 
-DTab.TabViewMini = Ember.View.extend({
-	templateName: "tabMini",
-	tab: null,
-	classNames: ["tabMini"]
-});
-
-
 DTab.TabView = Ember.View.extend({
-  templateName: "tab",
-  tab: null,
-  tagName: "li",
-  classNames: ["tab"],
+	tab: null,
 
   urlMaxLength: 150,
 
@@ -37,6 +27,19 @@ DTab.TabView = Ember.View.extend({
     var url = this.get("tab").url;
     return url.substring(0, max) + ((url.length > max)?"...":"");
   }.property("tab") //Might need to change to tab.url
+});
+
+
+DTab.TabViewMini = DTab.TabView.extend({
+	templateName: "tabMini",
+});
+
+
+DTab.TabViewDetailed = DTab.TabView.extend({
+  templateName: "tabDetailed",
+
+  tagName: "li",
+  classNames: ["tab"],
 });
 
 

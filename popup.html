@@ -14,7 +14,7 @@
 	</script>
 
 
-	<script type="text/x-handlebars" data-template-name="tab">
+	<script type="text/x-handlebars" data-template-name="tabDetailed">
 		<div class="icons">
 			<img {{bindAttr src="tab.favIconUrl"}} />
 		</div>
@@ -26,7 +26,7 @@
 
 
   <script type="text/x-handlebars" data-template-name="tabMini">
-		<img {{bindAttr src="tab.favIconUrl"}} />
+		<img {{bindAttr src="tab.favIconUrl"}} {{bindAttr alt="tab.title"}} {{action "open"}} />
   </script>
 
 
@@ -51,7 +51,7 @@
 		{{#if isExpanded}}
 			<ul class="tabList">
 				{{#each tabGroup.tabs}}
-					{{view DTab.TabView tabBinding="this"}}
+					{{view DTab.TabViewDetailed tabBinding="this"}}
 				{{/each}}
 			</ul>
 		{{else}}
