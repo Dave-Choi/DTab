@@ -135,7 +135,7 @@ h1{
 .tab .info{
   width: 440px;
   float: right;
-  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .tab h2{
