@@ -86,7 +86,6 @@ DTab.TabGroup = Ember.Object.extend({
   },
 
   saveToLocalStorage: function(){
-  	this.set("isTrashed", false);
     var data = JSON.stringify(this.get("tabs"));
     localStorage[this.get("title")] = data;
   },
@@ -106,10 +105,6 @@ DTab.TabGroup = Ember.Object.extend({
   trash: function(){
   	this.set("isTrashed", true);
   	this.removeFromLocalStorage();
-  },
-
-  untrash: function(){
-  	this.saveToLocalStorage();
   }
 
 });
@@ -131,10 +126,6 @@ DTab.TabGroupTitlePrompt = Ember.TextField.extend({
   parentView: null,
   tabGroup: null,
 
-  didInsertElement: function() {
-    this.$().focus();
-  },
-
   insertNewline: function(){
     var value = this.get("value");
     var tabGroup = this.get("tabGroup");
@@ -150,15 +141,76 @@ DTab.TabGroupTitlePrompt = Ember.TextField.extend({
 });
 
 
+/*
+DTab.TabGroupTitleView = Ember.ContainerView.extend({
+	childViews: [],
+  parentView: null,
+  tabGroup: null,
+
+  displayMode: "",
+
+  replaceView: function(newView){
+  	var childViews = this.get("childViews");
+  	childViews.clear();
+  	childViews.unshiftObject(newView);
+  },
+
+  showControls: function(){  	
+  	var tabGroup = this.get("tabGroup");
+  	var parentView = this.get("parentView");
+  	this.replaceView(DTab.TabGroupTitleControlsView.create({tabGroup: tabGroup, parentView: this.get("parentView")}));
+  },
+
+  showPrompt: function(){
+  	var tabGroup = this.get("tabGroup");
+  	var parentView = this.get("parentView");
+  	this.replaceView(DTab.TabGroupTitlePrompt.create({tabGroup: tabGroup, parentView: this.get("parentView")}));
+  },
+
+  displayModeChanged: function(){
+  	console.log("display mode observer");
+  	var displayMode = this.get("displayMode");
+  	if(displayMode == "prompt"){
+  		this.showPrompt();
+  	}
+  	else{
+  		this.showControls();
+  	}
+  }.observes("displayMode")
+});
+
+*/
+
+
 DTab.TabGroupView = Ember.View.extend({
   templateName: "tabGroup",
   tagName: "div",
   classNames: ["tabGroup"],
   tabGroup: null,
   isCollapsed: true,
-  isEditing: false,
+  isEditing: true,
+
+  /*
+
+  titleDisplayMode: function(){
+  	var isEditing = this.get("isEditing");
+  	var needsTitle = false;
+  	var tabGroup = this.get("tabGroup");
+  	if(tabGroup){
+  		needsTitle = (tabGroup.get("title") == null);
+  	}
+  	console.log("okay so far");
+  	if(isEditing || needsTitle){
+  		return "prompt";
+  	}
+  	return "controls";
+  }.property("tabGroup.title", "isEditing"), 
+  	//Set the property dependency on the specific relevant property instead of just the containing object
+
+	*/
   
   titleView: function(){
+  	console.log("calling titleView");
   	var isEditing = this.get("isEditing");
   	var needsTitle = false;
 		var tabGroup = this.get("tabGroup");
@@ -200,11 +252,6 @@ DTab.TabGroupView = Ember.View.extend({
   	tabGroup.trash();
   },
 
-  restore: function(){
-  	var tabGroup = this.get("tabGroup");
-  	tabGroup.untrash();
-  },
-
   trashedChanged: function(){
   	var tabGroup = this.get("tabGroup");
   	if(tabGroup.get("isTrashed")){
@@ -215,7 +262,6 @@ DTab.TabGroupView = Ember.View.extend({
   	}
   }.observes("tabGroup.isTrashed")
 });
-
 
 DTab.TabGroupController = Ember.ArrayProxy.create({
   content: [],
@@ -256,7 +302,6 @@ DTab.TabGroupController = Ember.ArrayProxy.create({
   */
 });
 
-
 DTab.TrashItem = Ember.Object.extend({
 	item: null,
 	source: null, //Maybe not necessary?
@@ -266,11 +311,9 @@ DTab.TrashItem = Ember.Object.extend({
 	}
 });
 
-
 DTab.TrashItemView = Ember.View.extend({
 
 });
-
 
 DTab.TrashController = Ember.ArrayProxy.extend({
 	content: []
@@ -307,7 +350,6 @@ DTab.CurrentGroupView = DTab.TabGroupView.extend({
 DTab.CurrentGroupController = Ember.ArrayController.create({
 	content: [],
 	initCurrentWindowGroup: function(){
-		this.clear();
 		var title = Ember.TextField.extend({});
 		var currentGroup = DTab.TabGroup.create({});
 		this.addObject(currentGroup);
@@ -330,7 +372,6 @@ DTab.CurrentGroupController = Ember.ArrayController.create({
 			//tabGroup.saveToLocalStorage();
 			tabGroup.rename(title);
 			DTab.TabGroupController.addGroup(tabGroup);
-			this.initCurrentWindowGroup();
 		}
 	}
 });
@@ -344,3 +385,17 @@ DTab.MainControlsView = Ember.View.extend({
 DTab.MainView = Ember.View.extend({
   templateName: "mainView"
 });
+
+/*
+DTab.ready(function(){
+  var tgc = DTab.TabGroupController;
+  tgc.initCurrentWindowGroup();
+  tgc.initFromLocalStorage();
+  tgc.log();
+
+  var cwgv = DTab.CurrentWindowGroupView;
+  cwgv.append("#currentWindowGroup");
+  //DTab.CurrentWindowGroupView.append("currentWindowGroup");
+});
+
+*/

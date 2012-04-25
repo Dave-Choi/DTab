@@ -26,12 +26,7 @@
 		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> 
 		<a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><i class="icon-external-link"></i></a>
 		<a title="Rename Group" {{action "rename" target="parentView"}}><i class="icon-edit"></i></a>
-		{{#if tabGroup.isTrashed}}
-			<a title="Trash Group" {{action "restore" target="parentView"}}><i class="icon-repeat"></i></a>
-		{{else}}
-			<a title="Trash Group" {{action "remove" target="parentView"}}><i class="icon-remove-sign"></i></a>
-		{{/if}}
-
+		<a title="Trash Group" {{action "remove" target="parentView"}}><i class="icon-remove-sign"></i></a>
   </script>
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitlePrompt">
