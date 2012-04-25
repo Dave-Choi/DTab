@@ -141,73 +141,13 @@ DTab.TabGroupTitlePrompt = Ember.TextField.extend({
 });
 
 
-/*
-DTab.TabGroupTitleView = Ember.ContainerView.extend({
-	childViews: [],
-  parentView: null,
-  tabGroup: null,
-
-  displayMode: "",
-
-  replaceView: function(newView){
-  	var childViews = this.get("childViews");
-  	childViews.clear();
-  	childViews.unshiftObject(newView);
-  },
-
-  showControls: function(){  	
-  	var tabGroup = this.get("tabGroup");
-  	var parentView = this.get("parentView");
-  	this.replaceView(DTab.TabGroupTitleControlsView.create({tabGroup: tabGroup, parentView: this.get("parentView")}));
-  },
-
-  showPrompt: function(){
-  	var tabGroup = this.get("tabGroup");
-  	var parentView = this.get("parentView");
-  	this.replaceView(DTab.TabGroupTitlePrompt.create({tabGroup: tabGroup, parentView: this.get("parentView")}));
-  },
-
-  displayModeChanged: function(){
-  	console.log("display mode observer");
-  	var displayMode = this.get("displayMode");
-  	if(displayMode == "prompt"){
-  		this.showPrompt();
-  	}
-  	else{
-  		this.showControls();
-  	}
-  }.observes("displayMode")
-});
-
-*/
-
-
 DTab.TabGroupView = Ember.View.extend({
   templateName: "tabGroup",
   tagName: "div",
   classNames: ["tabGroup"],
   tabGroup: null,
   isCollapsed: true,
-  isEditing: true,
-
-  /*
-
-  titleDisplayMode: function(){
-  	var isEditing = this.get("isEditing");
-  	var needsTitle = false;
-  	var tabGroup = this.get("tabGroup");
-  	if(tabGroup){
-  		needsTitle = (tabGroup.get("title") == null);
-  	}
-  	console.log("okay so far");
-  	if(isEditing || needsTitle){
-  		return "prompt";
-  	}
-  	return "controls";
-  }.property("tabGroup.title", "isEditing"), 
-  	//Set the property dependency on the specific relevant property instead of just the containing object
-
-	*/
+  isEditing: false,
   
   titleView: function(){
   	console.log("calling titleView");
