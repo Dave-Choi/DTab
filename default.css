@@ -114,9 +114,6 @@ h1{
   margin-bottom: 10px;
   float: left;
 
-  border: solid black 1px;
-  border-radius: 5px;
-
   padding: 5px;
   padding-left: 10px;
   width: 480px;
@@ -133,9 +130,24 @@ h1{
 }
 
 .tab .info{
-  width: 440px;
+  width: 400px;
   float: right;
+
+  margin-right: 10px;
   word-wrap: break-word;
+  padding-left: 10px;
+  border-left: solid black 1px;
+  border-right: solid #3399FF 3px;
+}
+
+.tab .controls{
+  float: right;
+  font-size: 20px;
+  color: black;
+}
+
+.tab .controls>*{
+  cursor: pointer;
 }
 
 .tab h2{

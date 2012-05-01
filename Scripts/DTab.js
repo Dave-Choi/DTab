@@ -12,21 +12,51 @@ DTab = Ember.Application.create({
 });
 
 
+DTab.Tab = Ember.Object.extend({
+	isTrashed: false
+});
+
+
 DTab.TabView = Ember.View.extend({
 	tab: null,
+  trashDelegate: null,
 
-  urlMaxLength: 150,
+	urlMaxLength: 150,
+	classNameBindings: ["tab.isTrashed:trashed"],
 
-  open: function(){
+	open: function(){
+		var tab = this.get("tab");
+		chrome.tabs.create({url: tab.url});
+	},
+
+	shortURL: function(){
+		var max = this.get("urlMaxLength");
+		var url = this.get("tab").url;
+		return url.substring(0, max) + ((url.length > max)?"...":"");
+	}.property("tab.url"),
+
+	trash: function(){
     var tab = this.get("tab");
-    chrome.tabs.create({url: tab.url});
-  },
+    tab.set("isTrashed", true);
 
-  shortURL: function(){
-    var max = this.get("urlMaxLength");
-    var url = this.get("tab").url;
-    return url.substring(0, max) + ((url.length > max)?"...":"");
-  }.property("tab") //Might need to change to tab.url
+    //Do trash stuff
+    console.log("trashing from child of " + this.get("contentView"));
+    /* 
+      Need to access the parent view, to know what group to update.
+      This is probably an anti-pattern.
+      Should probably ideally capture the click at the group controller level, 
+      and delegate to the TabGroup
+    */
+
+	},
+
+	untrash: function(){
+		var tab = this.get("tab");
+		tab.set("isTrashed", false);
+		//Do untrash stuff
+
+    console.log("untrashing from child of " + this.parentView);
+	}
 });
 
 
@@ -36,10 +66,10 @@ DTab.TabViewMini = DTab.TabView.extend({
 
 
 DTab.TabViewDetailed = DTab.TabView.extend({
-  templateName: "tabDetailed",
+	templateName: "tabDetailed",
 
-  tagName: "li",
-  classNames: ["tab"],
+	tagName: "li",
+	classNames: ["tab"],
 });
 
 
@@ -92,8 +122,28 @@ DTab.TabGroup = Ember.Object.extend({
     var data = localStorage[this.get("title")];
     if(data){
       var tabs = JSON.parse(data);
+      var i, len = tabs.length;
+      for(i=0; i<len; i++){
+      	var tab = tabs[i];
+      	tabs[i] = DTab.Tab.create(tab);
+      }
       this.set("tabs", tabs);
     }
+  },
+
+  loadFromCurrentWindow: function(){
+    var thisGroup = this;
+    chrome.windows.getCurrent(function(win){
+      chrome.tabs.getAllInWindow(win.id, function(tabs){
+        var tabsBuff = [];
+        var i, len = tabs.length;
+        for(i=0; i<len; i++){
+          var tab = tabs[i];
+          tabsBuff[i] = DTab.Tab.create(tab);
+        }
+        thisGroup.set("tabs", tabsBuff);
+      });
+    });
   },
 
   saveToLocalStorage: function(){
@@ -131,7 +181,7 @@ DTab.TabGroupTitleView = Ember.View.extend({
   tagName: "h1",
 
   parentView: null,
-tabGroup: null
+	tabGroup: null
 });
 
 
@@ -214,8 +264,13 @@ DTab.TabGroupView = Ember.View.extend({
   	else{
   		this.$().removeClass("trashed");
   	}
-  }.observes("tabGroup.isTrashed")
+  }.observes("tabGroup.isTrashed"),
+
+  tabTrashedChanged: function(){
+  	console.log("tab trashed");
+  }.observes("tabGroup.@each.isTrashed")
 });
+
 
 DTab.TabGroupController = Ember.ArrayProxy.create({
   content: [],
@@ -238,9 +293,6 @@ DTab.TabGroupController = Ember.ArrayProxy.create({
   	this.unshiftObject(group);
   },
 
-  renameGroup: function(){
-  },
-
   log: function(){
     var content = this.get("content");
     var i, len = content.length;
@@ -249,12 +301,11 @@ DTab.TabGroupController = Ember.ArrayProxy.create({
     }
   },
 
-  /*
   removeTrashed: function(){
   	this.get("content").filterProperty("isTrashed", true).forEach(this.removeObject, this);
-  }.observes("content.@each.isTrashed")
-  */
+  }
 });
+
 
 DTab.TrashItem = Ember.Object.extend({
 	item: null,
@@ -263,14 +314,6 @@ DTab.TrashItem = Ember.Object.extend({
 	undoMethod: function(){
 		return;
 	}
-});
-
-DTab.TrashItemView = Ember.View.extend({
-
-});
-
-DTab.TrashController = Ember.ArrayProxy.extend({
-	content: []
 });
 
 
@@ -305,15 +348,9 @@ DTab.CurrentGroupController = Ember.ArrayController.create({
 	content: [],
 	initCurrentWindowGroup: function(){
 		this.clear();
-		var title = Ember.TextField.extend({});
-		var currentGroup = DTab.TabGroup.create({});
+		var currentGroup = DTab.TabGroup.create();
+    currentGroup.loadFromCurrentWindow();
 		this.addObject(currentGroup);
-
-		chrome.windows.getCurrent(function(win){
-			chrome.tabs.getAllInWindow(win.id, function(tabs){
-				currentGroup.set("tabs", tabs);
-			});
-		});
 	},
 
 	saveGroup: function(title){
@@ -339,17 +376,3 @@ DTab.MainControlsView = Ember.View.extend({
 DTab.MainView = Ember.View.extend({
   templateName: "mainView"
 });
-
-/*
-DTab.ready(function(){
-  var tgc = DTab.TabGroupController;
-  tgc.initCurrentWindowGroup();
-  tgc.initFromLocalStorage();
-  tgc.log();
-
-  var cwgv = DTab.CurrentWindowGroupView;
-  cwgv.append("#currentWindowGroup");
-  //DTab.CurrentWindowGroupView.append("currentWindowGroup");
-});
-
-*/
