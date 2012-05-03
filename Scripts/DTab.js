@@ -38,24 +38,11 @@ DTab.TabView = Ember.View.extend({
 	trash: function(){
     var tab = this.get("tab");
     tab.set("isTrashed", true);
-
-    //Do trash stuff
-    console.log("trashing from child of " + this.get("contentView"));
-    /* 
-      Need to access the parent view, to know what group to update.
-      This is probably an anti-pattern.
-      Should probably ideally capture the click at the group controller level, 
-      and delegate to the TabGroup
-    */
-
 	},
 
 	untrash: function(){
 		var tab = this.get("tab");
 		tab.set("isTrashed", false);
-		//Do untrash stuff
-
-    console.log("untrashing from child of " + this.parentView);
 	}
 });
 
@@ -157,6 +144,20 @@ DTab.TabGroup = Ember.Object.extend({
   	}
   },
 
+  isStored: function(){
+    var data = localStorage[this.get("title")];
+    if(data){
+      return true;
+    }
+    return false;
+  }.property(),
+
+  update: function(){
+    if(this.get("isStored")){
+      this.saveToLocalStorage();
+    }
+  },
+
 	rename: function(newName){
   	this.removeFromLocalStorage();
   	this.set("title", newName);
@@ -171,6 +172,15 @@ DTab.TabGroup = Ember.Object.extend({
   untrash: function(){
   	this.set("isTrashed", false);
   	this.saveToLocalStorage();
+  },
+
+  removeTrashed: function(){
+    //Don't rerender if nothing's trashed
+    var notTrashedTabs = this.get("tabs").filterProperty("isTrashed", false);
+    if(this.get("tabs").length != notTrashedTabs.length){
+      this.set("tabs", this.get("tabs").filterProperty("isTrashed", false));
+      this.update();
+    }
   }
 
 });
@@ -266,9 +276,10 @@ DTab.TabGroupView = Ember.View.extend({
   	}
   }.observes("tabGroup.isTrashed"),
 
-  tabTrashedChanged: function(){
-  	console.log("tab trashed");
-  }.observes("tabGroup.@each.isTrashed")
+  tabTrashedChanged: function(obj, keyName, value){
+    var group = this.get("tabGroup");
+    group.update();
+  }.observes("tabGroup.tabs.@each.isTrashed")
 });
 
 
@@ -302,7 +313,11 @@ DTab.TabGroupController = Ember.ArrayProxy.create({
   },
 
   removeTrashed: function(){
-  	this.get("content").filterProperty("isTrashed", true).forEach(this.removeObject, this);
+    var content = this.get("content");
+  	content.filterProperty("isTrashed", true).forEach(this.removeObject, this);
+    content.forEach(function(item){
+      item.removeTrashed();
+    });
   }
 });
 

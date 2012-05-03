@@ -9,7 +9,7 @@
 
   <script type="text/x-handlebars" data-template-name="mainControls">
   	<a class="icon-plus" {{action "createNewGroup" target="DTab.TabGroupController"}}> Add Group</a>
-		<a class="icon-trash"> Empty Trash</a>	
+		<a class="icon-trash" {{action "removeTrashed" target="DTab.TabGroupController"}}> Empty Trash</a>	
 	</script>
 
 
@@ -22,7 +22,7 @@
 			{{#if tab.isTrashed}}
   			<i class="icon-repeat" {{action "untrash"}}></i>
   		{{else}}
-  			<i class="icon-remove-sign" {{action "trash"}}></i>
+  			<i class="icon-trash" {{action "trash"}}></i>
   		{{/if}}
   	</div>
 
@@ -46,7 +46,7 @@
 		{{#if tabGroup.isTrashed}}
 			<a title="Untrash Group" {{action "untrash" target="tabGroup"}}><i class="icon-repeat"></i></a>
 		{{else}}
-			<a title="Trash Group" {{action "trash" target="tabGroup"}}><i class="icon-remove-sign"></i></a>
+			<a title="Trash Group" {{action "trash" target="tabGroup"}}><i class="icon-trash"></i></a>
 		{{/if}}
   </script>
 
