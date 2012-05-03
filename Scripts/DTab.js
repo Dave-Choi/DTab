@@ -375,6 +375,7 @@ DTab.CurrentGroupController = Ember.ArrayController.create({
 		}
 		else{
 			var tabGroup = this.get("content")[0];
+      tabGroup.removeTrashed();
 			tabGroup.rename(title);
 			DTab.TabGroupController.addGroup(tabGroup);
 			this.initCurrentWindowGroup();
