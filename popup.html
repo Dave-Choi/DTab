@@ -14,40 +14,40 @@
 
 
 	<script type="text/x-handlebars" data-template-name="tabDetailed">
-		<div class="icons">
-			<img {{bindAttr src="tab.favIconUrl"}} />
+		<div class="controls">
+			<img {{bindAttr src="favIconUrl"}} />
+
+			{{#if tab.isTrashed}}
+				<i class="icon-repeat" {{action "untrash"}}></i>
+			{{else}}
+				<i class="icon-trash" {{action "trash"}}></i>
+			{{/if}}
 		</div>
 
-		<div class="controls">
-			{{#if tab.isTrashed}}
-  			<i class="icon-repeat" {{action "untrash"}}></i>
-  		{{else}}
-  			<i class="icon-trash" {{action "trash"}}></i>
-  		{{/if}}
-  	</div>
-
 		<div class="info">
-  		<h2>{{tab.title}}</h2>
-  		<a {{bindAttr href="tab.url"}} {{action "open"}}>{{shortURL}}</a>
-  	</div>
+			<h2>{{tab.title}}</h2>
+			<a {{bindAttr href="tab.url"}} {{action "open"}}>{{shortURL}}</a>
+		</div>
   </script>
 
 
   <script type="text/x-handlebars" data-template-name="tabMini">
-		<img {{bindAttr src="tab.favIconUrl"}} {{bindAttr alt="tab.title"}} {{action "open"}} />
+		<img {{bindAttr src="favIconUrl"}} {{bindAttr alt="tab.title"}} {{bindAttr title="tab.title"}} {{action "open"}} />
   </script>
 
 
   <script type="text/x-handlebars" data-template-name="tabGroupTitle">
-		<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> 
-		<a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><i class="icon-external-link"></i></a>
-		<span class="separator">|</span>
-		<a title="Rename Group" {{action "rename" target="parentView"}}><i class="icon-edit"></i></a>
-		{{#if tabGroup.isTrashed}}
-			<a title="Untrash Group" {{action "untrash" target="tabGroup"}}><i class="icon-repeat"></i></a>
-		{{else}}
-			<a title="Trash Group" {{action "trash" target="tabGroup"}}><i class="icon-trash"></i></a>
-		{{/if}}
+  	<h1>
+			<a title="Open Group in This Window" {{action "openInOwnWindow" target="tabGroup"}}>{{tabGroup.title}}</a> 
+			<a title="Open Group in New Window" {{action "openInNewWindow" target="tabGroup"}}><i class="icon-external-link"></i></a>
+			<span class="separator">|</span>
+			<a title="Rename Group" {{action "rename" target="parentView"}}><i class="icon-edit"></i></a>
+			{{#if tabGroup.isTrashed}}
+				<a title="Untrash Group" {{action "untrash" target="tabGroup"}}><i class="icon-repeat"></i></a>
+			{{else}}
+				<a title="Trash Group" {{action "trash" target="tabGroup"}}><i class="icon-trash"></i></a>
+			{{/if}}
+		</h1>
   </script>
 
 

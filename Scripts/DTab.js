@@ -4,25 +4,33 @@ DTab = Ember.Application.create({
 		cgc.initCurrentWindowGroup();
 
 		var tgc = DTab.TabGroupController;
-	  
-	  tgc.initFromLocalStorage();
-	  tgc.log();
+		
+		tgc.initFromLocalStorage();
+		tgc.log();
 	}
 
 });
 
 
 DTab.Tab = Ember.Object.extend({
+	/*
+		This class is intended to extend a chrome tab object
+
+	*/
 	isTrashed: false
 });
 
 
 DTab.TabView = Ember.View.extend({
 	tab: null,
-  trashDelegate: null,
+	trashDelegate: null,
 
 	urlMaxLength: 150,
 	classNameBindings: ["tab.isTrashed:trashed"],
+
+	favIconUrl: function(){
+		return this.get("tab").get("favIconUrl") || "Images/faviconFallback.png";
+	}.property(),
 
 	open: function(){
 		var tab = this.get("tab");
@@ -36,8 +44,8 @@ DTab.TabView = Ember.View.extend({
 	}.property("tab.url"),
 
 	trash: function(){
-    var tab = this.get("tab");
-    tab.set("isTrashed", true);
+		var tab = this.get("tab");
+		tab.set("isTrashed", true);
 	},
 
 	untrash: function(){
@@ -61,177 +69,214 @@ DTab.TabViewDetailed = DTab.TabView.extend({
 
 
 DTab.TabGroup = Ember.Object.extend({
-  title: null,
-  tabs: [],
-  isTrashed: false,
+	title: null,
+	tabs: [],
+	isTrashed: false,
 
-  urls: function(){
-    var i, buff = [], tabs = this.get("tabs");
-    tabs.forEach(function(item){
-      buff.push(item.url);
-    });
-    return buff;
-  }.property("tabs"), //Might need to change to each tabs
+	urls: function(){
+		var i, buff = [], tabs = this.get("tabs");
+		tabs.forEach(function(item){
+			buff.push(item.url);
+		});
+		return buff;
+	}.property("tabs"), //Might need to change to each tabs
 
-  log: function(){
-    console.log(this.get("title"));
-    var tabs = this.get("tabs");
-    var i, len = tabs.length;
-    for(i=0; i<len; i++){
-      var tab = tabs[i];
-      console.log("\t" + tab.title + "\n\t" + tab.url);
-    }
-  },
+	copyTabs: function(group){
+		//To Do: check if instance of TabGroup, maybe don't copy the title
+		var tabsCopy = group.get("tabs").copy();
+		this.set("tabs", tabsCopy);
+	},
 
-  open: function(windowId){
-    var tabs = this.get("tabs");
-    var i, count = tabs.length;
-    for(i=0; i<count; i++){
-      var tab = tabs[i];
-      chrome.tabs.create({windowId: windowId, url: tab.url, pinned: tab.pinned});
-    }
-  },
+	log: function(){
+		console.log(this.get("title"));
+		var tabs = this.get("tabs");
+		var i, len = tabs.length;
+		for(i=0; i<len; i++){
+			var tab = tabs[i];
+			console.log("\t" + tab.title + "\n\t" + tab.url);
+		}
+	},
 
-  openInOwnWindow: function(){
-    var group = this;
-    chrome.windows.getCurrent(function(win){
-      group.open(win.id);
-    });
-  },
+	open: function(windowId){
+		var tabs = this.get("tabs");
+		var i, count = tabs.length;
+		for(i=0; i<count; i++){
+			var tab = tabs[i];
+			chrome.tabs.create({windowId: windowId, url: tab.url, pinned: tab.pinned});
+		}
+	},
 
-  openInNewWindow: function(){
-    var group = this;
-    var urls = this.get("urls");
-    chrome.windows.create({focused: true, url: urls});
-  },
+	openInOwnWindow: function(){
+		var group = this;
+		chrome.windows.getCurrent(function(win){
+			group.open(win.id);
+		});
+	},
 
-  loadFromLocalStorage: function(){
-    var data = localStorage[this.get("title")];
-    if(data){
-      var tabs = JSON.parse(data);
-      var i, len = tabs.length;
-      for(i=0; i<len; i++){
-      	var tab = tabs[i];
-      	tabs[i] = DTab.Tab.create(tab);
-      }
-      this.set("tabs", tabs);
-    }
-  },
+	openInNewWindow: function(){
+		var group = this;
+		var urls = this.get("urls");
+		chrome.windows.create({focused: true, url: urls});
+	},
 
-  loadFromCurrentWindow: function(){
-    var thisGroup = this;
-    chrome.windows.getCurrent(function(win){
-      chrome.tabs.getAllInWindow(win.id, function(tabs){
-        var tabsBuff = [];
-        var i, len = tabs.length;
-        for(i=0; i<len; i++){
-          var tab = tabs[i];
-          tabsBuff[i] = DTab.Tab.create(tab);
-        }
-        thisGroup.set("tabs", tabsBuff);
-      });
-    });
-  },
+	loadFromLocalStorage: function(){
+		var data = localStorage[this.get("title")];
+		if(data){
+			var tabs = JSON.parse(data);
+			var i, len = tabs.length;
+			for(i=0; i<len; i++){
+				var tab = tabs[i];
+				tabs[i] = DTab.Tab.create(tab);
+			}
+			this.set("tabs", tabs);
+		}
+	},
 
-  saveToLocalStorage: function(){
-    var data = JSON.stringify(this.get("tabs"));
-    localStorage[this.get("title")] = data;
-  },
+	saveToLocalStorage: function(){
+		var data = JSON.stringify(this.get("tabs"));
+		localStorage[this.get("title")] = data;
+	},
 
-  removeFromLocalStorage: function(){
-  	if(localStorage[this.get("title")]){
-  		delete localStorage[this.get("title")];
-  	}
-  },
+	removeFromLocalStorage: function(){
+		if(localStorage[this.get("title")]){
+			delete localStorage[this.get("title")];
+		}
+	},
 
-  isStored: function(){
-    var data = localStorage[this.get("title")];
-    if(data){
-      return true;
-    }
-    return false;
-  }.property(),
+	isStored: function(){
+		var data = localStorage[this.get("title")];
+		if(data){
+			return true;
+		}
+		return false;
+	}.property(),
 
-  update: function(){
-    if(this.get("isStored")){
-      this.saveToLocalStorage();
-    }
-  },
+	update: function(){
+		if(this.get("isStored")){
+			this.saveToLocalStorage();
+		}
+	},
 
 	rename: function(newName){
-  	this.removeFromLocalStorage();
-  	this.set("title", newName);
-  	this.saveToLocalStorage();
-  },
+		this.removeFromLocalStorage();
+		this.set("title", newName);
+		this.saveToLocalStorage();
+	},
 
-  trash: function(){
-  	this.set("isTrashed", true);
-  	this.removeFromLocalStorage();
-  },
+	trash: function(){
+		this.set("isTrashed", true);
+		this.removeFromLocalStorage();
+	},
 
-  untrash: function(){
-  	this.set("isTrashed", false);
-  	this.saveToLocalStorage();
-  },
+	untrash: function(){
+		this.set("isTrashed", false);
+		this.saveToLocalStorage();
+	},
 
-  removeTrashed: function(){
-    //Don't rerender if nothing's trashed
-    var notTrashedTabs = this.get("tabs").filterProperty("isTrashed", false);
-    if(this.get("tabs").length != notTrashedTabs.length){
-      this.set("tabs", this.get("tabs").filterProperty("isTrashed", false));
-      this.update();
-    }
-  }
+	removeTrashed: function(){
+		//Don't rerender if nothing's trashed
+		var notTrashedTabs = this.get("tabs").filterProperty("isTrashed", false);
+		if(this.get("tabs").length != notTrashedTabs.length){
+			this.set("tabs", this.get("tabs").filterProperty("isTrashed", false));
+			this.update();
+		}
+	}
 
 });
 
 
-DTab.TabGroupTitleView = Ember.View.extend({
-  templateName: "tabGroupTitle",
-  tagName: "h1",
+DTab.LiveTabGroup = DTab.TabGroup.extend({
+	window: null,
+	subscriptions: [chrome.tabs.onUpdated, chrome.tabs.onMoved, chrome.tabs.onAttached, chrome.tabs.onDetached, chrome.tabs.onRemoved],
 
-  parentView: null,
+	loadFromWindow: function(){
+		var thisGroup = this;
+		var window = this.get("window");
+
+		chrome.tabs.getAllInWindow(window.id, function(tabs){
+			var tabsBuff = [];
+			var i, len = tabs.length;
+			for(i=0; i<len; i++){
+				var tab = tabs[i];
+				tabsBuff[i] = DTab.Tab.create(tab);
+			}
+			thisGroup.set("tabs", tabsBuff);
+		});
+	},
+
+	listenForUpdates: function(){
+		var window = this.get("window");
+		var thisGroup = this;
+		var subscriptions = this.get("subscriptions");
+
+		subscriptions.forEach(function(item, index, self){
+			item.addListener(function(){
+				thisGroup.loadFromWindow();
+			});
+		});
+	},
+
+	initWithWindow: function(window){
+		this.set("window", window);
+		this.loadFromWindow();
+		this.listenForUpdates();
+	},
+
+	initWithCurrentWindow: function(){
+		var thisGroup = this;
+		chrome.windows.getCurrent(function(win){
+			thisGroup.initWithWindow(win);
+		});
+	}
+});
+
+
+DTab.TabGroupTitleView = Ember.View.extend({
+	templateName: "tabGroupTitle",
+	tagName: "div",
+
+	parentView: null,
 	tabGroup: null
 });
 
 
 DTab.TabGroupTitlePrompt = Ember.TextField.extend({
-  placeholder: "Name These Tabs",
-  classNames: ["titlePrompt"],
+	placeholder: "Name These Tabs",
+	classNames: ["titlePrompt"],
 
-  parentView: null,
-  tabGroup: null,
+	parentView: null,
+	tabGroup: null,
 
-  insertNewline: function(){
-    var value = this.get("value");
-    var tabGroup = this.get("tabGroup");
+	insertNewline: function(){
+		var value = this.get("value");
+		var tabGroup = this.get("tabGroup");
 
-    if(value){
-      //tabGroup.set("title", value);
-      tabGroup.rename(value);
-      console.log(this.get("parentView").get("isEditing"));
-      this.get("parentView").set("isEditing", false);
+		if(value){
+			//tabGroup.set("title", value);
+			tabGroup.rename(value);
+			console.log(this.get("parentView").get("isEditing"));
+			this.get("parentView").set("isEditing", false);
 
-    }
-  },
+		}
+	},
 
-  didInsertElement: function(){
-  	this.$().focus();
-  }
+	didInsertElement: function(){
+		this.$().focus();
+	}
 });
 
 
 DTab.TabGroupView = Ember.View.extend({
-  templateName: "tabGroup",
-  tagName: "div",
-  classNames: ["tabGroup"],
-  tabGroup: null,
-  isCollapsed: true,
-  isEditing: false,
-  
-  titleView: function(){
-  	var isEditing = this.get("isEditing");
-  	var needsTitle = false;
+	templateName: "tabGroup",
+	tagName: "div",
+	classNames: ["tabGroup"],
+	tabGroup: null,
+	isCollapsed: true,
+	isEditing: false,
+	
+	titleView: function(){
+		var isEditing = this.get("isEditing");
+		var needsTitle = false;
 		var tabGroup = this.get("tabGroup");
 		if(tabGroup){
 			needsTitle = (tabGroup.get("title") == null);
@@ -245,80 +290,80 @@ DTab.TabGroupView = Ember.View.extend({
 			tabGroup: tabGroup,
 			value: tabGroup.get("title")
 		});
-  }.property("tabGroup.title", "isEditing"),
+	}.property("tabGroup.title", "isEditing"),
 
-  titleViewChanged: function(){
-  	this.rerender();
-  }.observes("titleView"),
+	titleViewChanged: function(){
+		this.rerender();
+	}.observes("titleView"),
 
-  isExpanded: function(){
-    //This is so stupid
-    return !(this.get("isCollapsed"));
-  }.property("isCollapsed"),
+	isExpanded: function(){
+		//This is so stupid
+		return !(this.get("isCollapsed"));
+	}.property("isCollapsed"),
 
-  toggleCollapsed: function(){
-    var isCollapsed = this.get("isCollapsed");
-    this.set("isCollapsed", !isCollapsed);
-  },
+	toggleCollapsed: function(){
+		var isCollapsed = this.get("isCollapsed");
+		this.set("isCollapsed", !isCollapsed);
+	},
 
-  rename: function(){
-  	console.log("rename from TabGroupView");
-  	this.set("isEditing", true);
-  },
+	rename: function(){
+		console.log("rename from TabGroupView");
+		this.set("isEditing", true);
+	},
 
-  trashedChanged: function(){
-  	var tabGroup = this.get("tabGroup");
-  	if(tabGroup.get("isTrashed")){
-  		this.$().addClass("trashed");
-  	}
-  	else{
-  		this.$().removeClass("trashed");
-  	}
-  }.observes("tabGroup.isTrashed"),
+	trashedChanged: function(){
+		var tabGroup = this.get("tabGroup");
+		if(tabGroup.get("isTrashed")){
+			this.$().addClass("trashed");
+		}
+		else{
+			this.$().removeClass("trashed");
+		}
+	}.observes("tabGroup.isTrashed"),
 
-  tabTrashedChanged: function(obj, keyName, value){
-    var group = this.get("tabGroup");
-    group.update();
-  }.observes("tabGroup.tabs.@each.isTrashed")
+	tabTrashedChanged: function(obj, keyName, value){
+		var group = this.get("tabGroup");
+		group.update();
+	}.observes("tabGroup.tabs.@each.isTrashed")
 });
 
 
 DTab.TabGroupController = Ember.ArrayProxy.create({
-  content: [],
+	content: [],
 
-  initFromLocalStorage: function(){
-    for(var key in localStorage){
-      var group = DTab.TabGroup.create({title: key});
-      group.loadFromLocalStorage();
-      this.addObject(group);
-    }
-  },
+	initFromLocalStorage: function(){
+		for(var key in localStorage){
+			var group = DTab.TabGroup.create({title: key});
+			group.loadFromLocalStorage();
+			this.addObject(group);
+		}
+	},
 
-  createNewGroup: function(){
-    var group = DTab.TabGroup.create();
-    //var content = this.get("content");
-    this.unshiftObject(group);
-  },
+	createNewGroup: function(){
+		var group = DTab.TabGroup.create();
+		//var content = this.get("content");
+		this.unshiftObject(group);
+	},
 
-  addGroup: function(group){
-  	this.unshiftObject(group);
-  },
+	addGroup: function(group){
+		this.unshiftObject(group);
+	},
 
-  log: function(){
-    var content = this.get("content");
-    var i, len = content.length;
-    for(i=0; i<len; i++){
-      content[i].log();
-    }
-  },
+	log: function(){
+		var content = this.get("content");
+		var i, len = content.length;
+		for(i=0; i<len; i++){
+			content[i].log();
+		}
+	},
 
-  removeTrashed: function(){
-    var content = this.get("content");
-  	content.filterProperty("isTrashed", true).forEach(this.removeObject, this);
-    content.forEach(function(item){
-      item.removeTrashed();
-    });
-  }
+	removeTrashed: function(){
+		var content = this.get("content");
+		content.filterProperty("isTrashed", true).forEach(this.removeObject, this);
+		content.forEach(function(item){
+			item.removeTrashed();
+		});
+	}
 });
 
 
@@ -333,20 +378,20 @@ DTab.TrashItem = Ember.Object.extend({
 
 
 DTab.CurrentGroupTitlePrompt = Ember.TextField.extend({
-  placeholder: "Name This Window's Tabs",
-  classNames: ["titlePrompt"],
+	placeholder: "Name This Window's Tabs",
+	classNames: ["titlePrompt"],
 
-  parentView: null,
-  tabGroup: null,
+	parentView: null,
+	tabGroup: null,
 
-  insertNewline: function(){
-  	//Clone this group, add to main list.
-  	var value = this.get("value");
-  	if(value){
-  		DTab.CurrentGroupController.saveGroup(value);
-  		this.set("value", null);
-  	}
-  }
+	insertNewline: function(){
+		//Clone this group, add to main list.
+		var value = this.get("value");
+		if(value){
+			DTab.CurrentGroupController.saveGroup(value);
+			this.set("value", null);
+		}
+	}
 });
 
 
@@ -361,10 +406,16 @@ DTab.CurrentGroupView = DTab.TabGroupView.extend({
 
 DTab.CurrentGroupController = Ember.ArrayController.create({
 	content: [],
+
+	refreshGroup: function(){
+		var currentGroup = this.objectAtContent(0);
+		currentGroup.loadFromCurrentWindow();
+	},
+
 	initCurrentWindowGroup: function(){
 		this.clear();
-		var currentGroup = DTab.TabGroup.create();
-    currentGroup.loadFromCurrentWindow();
+		var currentGroup = DTab.LiveTabGroup.create();
+		currentGroup.initWithCurrentWindow();
 		this.addObject(currentGroup);
 	},
 
@@ -374,10 +425,14 @@ DTab.CurrentGroupController = Ember.ArrayController.create({
 			//Confirm overwrite
 		}
 		else{
-			var tabGroup = this.get("content")[0];
-      tabGroup.removeTrashed();
-			tabGroup.rename(title);
-			DTab.TabGroupController.addGroup(tabGroup);
+			var tabGroup = this.objectAtContent(0);
+			tabGroup.removeTrashed();
+
+			var groupCopy = DTab.TabGroup.create();
+			groupCopy.copyTabs(tabGroup);
+			groupCopy.rename(title);
+			DTab.TabGroupController.addGroup(groupCopy);
+
 			this.initCurrentWindowGroup();
 		}
 	}
@@ -385,10 +440,10 @@ DTab.CurrentGroupController = Ember.ArrayController.create({
 
 
 DTab.MainControlsView = Ember.View.extend({
-  templateName: "mainControls"
+	templateName: "mainControls"
 });
 
 
 DTab.MainView = Ember.View.extend({
-  templateName: "mainView"
+	templateName: "mainView"
 });
