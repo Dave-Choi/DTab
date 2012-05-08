@@ -109,6 +109,23 @@ h1{
   border-radius: 5px;
 }
 
+.favicon{
+  position: relative;
+}
+
+.favicon .icon-pushpin{
+  position: absolute;
+  top: -16px;
+  left: -12px;
+
+  font-size: 16px;
+  opacity: .2;
+}
+
+.favicon .icon-pushpin.pinned{
+  opacity: 1;
+}
+
 .tab{
   clear: both;
   color: blue;

@@ -15,7 +15,10 @@
 
 	<script type="text/x-handlebars" data-template-name="tabDetailed">
 		<div class="controls">
-			<img {{bindAttr src="favIconUrl"}} />
+			<div class="favicon">
+				<i {{bindAttr class="tab.pinned:pinned :icon-pushpin"}} {{action "togglePinned"}}></i>
+				<img {{bindAttr src="favIconUrl"}} {{action "open"}} />
+			</div>
 
 			{{#if tab.isTrashed}}
 				<i class="icon-repeat" {{action "untrash"}}></i>
@@ -32,7 +35,9 @@
 
 
   <script type="text/x-handlebars" data-template-name="tabMini">
-		<img {{bindAttr src="favIconUrl"}} {{bindAttr alt="tab.title"}} {{bindAttr title="tab.title"}} {{action "open"}} />
+		<div class="favicon">
+			<img {{bindAttr src="favIconUrl"}} {{bindAttr alt="tab.title"}} {{bindAttr title="tab.title"}} {{action "open"}} />
+		</div>
   </script>
 
 

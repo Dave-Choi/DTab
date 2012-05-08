@@ -14,8 +14,8 @@ DTab = Ember.Application.create({
 
 DTab.Tab = Ember.Object.extend({
 	/*
-		This class is intended to extend a chrome tab object
-
+		This class is intended to extend a chrome tab object.
+		Mostly just used to observe the isTrashed property.
 	*/
 	isTrashed: false
 });
@@ -34,7 +34,7 @@ DTab.TabView = Ember.View.extend({
 
 	open: function(){
 		var tab = this.get("tab");
-		chrome.tabs.create({url: tab.url});
+		chrome.tabs.create({url: tab.url, pinned: tab.pinned});
 	},
 
 	shortURL: function(){
@@ -51,6 +51,11 @@ DTab.TabView = Ember.View.extend({
 	untrash: function(){
 		var tab = this.get("tab");
 		tab.set("isTrashed", false);
+	},
+
+	togglePinned: function(){
+		var tab = this.get("tab");
+		tab.set("pinned", !(tab.get("pinned")));
 	}
 });
 
@@ -79,7 +84,22 @@ DTab.TabGroup = Ember.Object.extend({
 			buff.push(item.url);
 		});
 		return buff;
-	}.property("tabs"), //Might need to change to each tabs
+	}.property("tabs.@each.url"),
+
+	pinnedIndices: function(){
+		//This is a shitty utility function that Chrome's broken behavior made me write
+		var indices = [];
+		var tabs = this.get("tabs");
+		var i, len = tabs.length;
+
+		for(i=0; i<len; i++){
+			if(tabs[i].get("pinned")){
+				indices.push(i);
+			}
+		}
+		console.log(indices);
+		return indices;
+	},
 
 	copyTabs: function(group){
 		//To Do: check if instance of TabGroup, maybe don't copy the title
@@ -114,9 +134,31 @@ DTab.TabGroup = Ember.Object.extend({
 	},
 
 	openInNewWindow: function(){
+		/*
+			Near as I can tell, Chrome's callback timing on the chrome.windows.create function
+			is inconsistent, so creating the window and then attempting to add tabs to it 
+			in bulk after it's already created in the callback has inconsistent results.
+			
+			Feeding it a list of urls in is configuration object seems to consistently work, 
+			but doesn't allow you to create them as pinned.
+
+			Current implementation creates via a URL list and changes the appropriate tabs
+			to pinned via the callback.  Really crappy hack until I come up with something better.
+		*/
 		var group = this;
 		var urls = this.get("urls");
-		chrome.windows.create({focused: true, url: urls});
+		var pinnedIndices = this.pinnedIndices();
+
+		chrome.windows.create({focused: true, url: urls}, function(window){
+			chrome.tabs.getAllInWindow(window.id, function(tabs){
+				var i, len = pinnedIndices.length;
+				for(i=0; i<len; i++){
+					var tab = tabs[i];
+					console.log(tabs[i]);
+					chrome.tabs.update(tab.id, {pinned: true});
+				}
+			});
+		});
 	},
 
 	loadFromLocalStorage: function(){
@@ -180,7 +222,12 @@ DTab.TabGroup = Ember.Object.extend({
 			this.set("tabs", this.get("tabs").filterProperty("isTrashed", false));
 			this.update();
 		}
-	}
+	},
+
+	pinnedChanged: function(){
+		console.log("pinned changed");
+		this.update();
+	}.observes("tabs.@each.pinned")
 
 });
 
