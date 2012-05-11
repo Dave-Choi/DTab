@@ -86,21 +86,6 @@ DTab.TabGroup = Ember.Object.extend({
 		return buff;
 	}.property("tabs.@each.url"),
 
-	pinnedIndices: function(){
-		//This is a shitty utility function that Chrome's broken behavior made me write
-		var indices = [];
-		var tabs = this.get("tabs");
-		var i, len = tabs.length;
-
-		for(i=0; i<len; i++){
-			if(tabs[i].get("pinned")){
-				indices.push(i);
-			}
-		}
-		console.log(indices);
-		return indices;
-	},
-
 	copyTabs: function(group){
 		//To Do: check if instance of TabGroup, maybe don't copy the title
 		var tabsCopy = group.get("tabs").copy();
@@ -135,28 +120,38 @@ DTab.TabGroup = Ember.Object.extend({
 
 	openInNewWindow: function(){
 		/*
-			Near as I can tell, Chrome's callback timing on the chrome.windows.create function
-			is inconsistent, so creating the window and then attempting to add tabs to it 
-			in bulk after it's already created in the callback has inconsistent results.
-			
-			Feeding it a list of urls in is configuration object seems to consistently work, 
-			but doesn't allow you to create them as pinned.
+			This appears to be dependent on the focused property being set to false in the
+			chrome.windows.create call.
 
-			Current implementation creates via a URL list and changes the appropriate tabs
-			to pinned via the callback.  Really crappy hack until I come up with something better.
+			When set to true, only some of the tabs will open, and it's totally inconsistent
+			from run to run, unless running the developer tools as well.
+
+			I've taken a few approaches to this, including only opening a tab recursively 
+			in the callback function after opening a tab.
 		*/
-		var group = this;
-		var urls = this.get("urls");
-		var pinnedIndices = this.pinnedIndices();
 
-		chrome.windows.create({focused: true, url: urls}, function(window){
-			chrome.tabs.getAllInWindow(window.id, function(tabs){
-				var i, len = pinnedIndices.length;
+		var tabs = this.get("tabs");
+
+		chrome.windows.create({focused: false, url: []}, function(window){
+			chrome.tabs.query({windowId: window.id}, function(results){
+				/*
+					Query for existing tabs (Chrome opens a new tab when you have it create a window)
+					to close them later
+				*/
+				var i, len = tabs.length;
 				for(i=0; i<len; i++){
 					var tab = tabs[i];
-					console.log(tabs[i]);
-					chrome.tabs.update(tab.id, {pinned: true});
+					chrome.tabs.create({windowId: window.id, url: tab.url, pinned: tab.pinned});			
 				}
+
+				//Close blank tab(s)
+				var blankTabIds = [];
+				len = results.length;
+				for(i=0; i<len; i++){
+					blankTabIds.push(results[i].id);
+				}
+				chrome.tabs.remove(blankTabIds);
+
 			});
 		});
 	},
@@ -240,7 +235,7 @@ DTab.LiveTabGroup = DTab.TabGroup.extend({
 		var thisGroup = this;
 		var window = this.get("window");
 
-		chrome.tabs.getAllInWindow(window.id, function(tabs){
+		chrome.tabs.query({windowId: window.id}, function(tabs){
 			var tabsBuff = [];
 			var i, len = tabs.length;
 			for(i=0; i<len; i++){
